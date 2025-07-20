@@ -60,34 +60,6 @@ docker run -d --name datanode --network hadoop hadoop-datanode-image
 
 ----------
 
-## 🌉 Network Features Comparison
-
-Feature
-
-bridge (default)
-
-User-defined (like `hadoop`)
-
-Containers talk by name
-
-❌ No
-
-✅ Yes
-
-DNS-based service discovery
-
-❌ No
-
-✅ Yes
-
-Manual control
-
-❌ Limited
-
-✅ Full
-
-----------
-
 ## 🔍 To verify your network:
 
 ```bash
