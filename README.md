@@ -1,39 +1,44 @@
-🐘 Hadoop Multi-Node Cluster with Docker Compose
-Set up a fully working Hadoop cluster using Docker and Docker Compose on your local machine. This setup includes:
+# 🐘 Hadoop Multi-Node Cluster with Docker Compose
 
-✅ 1 NameNode
+Set up a fully functional **Hadoop cluster** using **Docker** and **Docker Compose** on your local machine. This setup includes:
 
-✅ 2 DataNodes
+✅ 1 NameNode  
+✅ 2 DataNodes  
+✅ HDFS access and MapReduce job execution  
+✅ Web UIs for monitoring Hadoop services  
 
-✅ Easy HDFS access and MapReduce job execution
+🎯 **Perfect for** students, researchers, and developers learning Big Data.
 
-✅ Web UIs for monitoring Hadoop services
+---
 
-✅ Tested on Ubuntu with Docker and Docker Compose
-🎯 Perfect for students, researchers, and developers learning Big Data
+## 📂 Repository Structure
 
-📂 Repository Structure
-pgsql
-Copy
-Edit
 hadoop-docker-cluster/
 │
-├── docker-compose.yml         # Cluster configuration
-├── README.md                  # This documentation
-🔧 Prerequisites
-Make sure you have:
+├── docker-compose.yml # Cluster configuration
+├── README.md # Project documentation
 
-Docker installed
-
-Docker Compose installed
-
-A Linux system (recommended: Ubuntu 22.04+)
-
-🚀 Quick Start
-1️⃣ Clone the Repository
-bash
+yaml
 Copy
 Edit
+
+---
+
+## 🔧 Prerequisites
+
+Ensure you have the following installed:
+
+- Docker  
+- Docker Compose  
+- Linux system (Recommended: Ubuntu 22.04+)
+
+---
+
+## 🚀 Quick Start
+
+### 1️⃣ Clone the Repository
+
+```bash
 git clone https://github.com/your-username/hadoop-docker-cluster.git
 cd hadoop-docker-cluster
 2️⃣ Create a Custom Docker Network
@@ -46,7 +51,7 @@ bash
 Copy
 Edit
 docker-compose up -d
-This will spin up:
+This starts:
 
 🧠 NameNode at http://localhost:9870
 
@@ -54,7 +59,7 @@ This will spin up:
 
 💾 DataNode 2 at http://localhost:9865
 
-To check:
+To verify:
 
 bash
 Copy
@@ -67,7 +72,7 @@ DataNode 1	9864	http://localhost:9864
 DataNode 2	9865	http://localhost:9865
 
 🛠️ Interacting with HDFS
-Step 1: Enter the NameNode Container
+Step 1: Access the NameNode Container
 bash
 Copy
 Edit
@@ -80,7 +85,7 @@ hdfs dfs -mkdir /test
 hdfs dfs -put /etc/hosts /test
 hdfs dfs -ls /test
 🧪 Run WordCount MapReduce Job
-Inside the namenode container:
+Inside the NameNode container:
 
 bash
 Copy
@@ -94,10 +99,10 @@ hdfs dfs -put etc/hadoop/*.xml /input
 # Run job
 hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar wordcount /input /output
 
-# Check output
+# View output
 hdfs dfs -cat /output/part-r-00000
 🧹 Shutting Down the Cluster
-From your host terminal:
+To stop the cluster:
 
 bash
 Copy
@@ -110,7 +115,7 @@ Copy
 Edit
 docker-compose down -v
 🧾 Docker Network Verification
-Ensure the hadoop network exists:
+Ensure the custom Docker network hadoop exists:
 
 bash
 Copy
@@ -124,11 +129,11 @@ Edit
 NETWORK ID     NAME      DRIVER    SCOPE
 abcdefgh1234   hadoop    bridge    local
 📌 Tips & Reminders
-Use docker-compose logs -f namenode to see real-time logs
+Use docker-compose logs -f namenode to stream NameNode logs.
 
-You can scale DataNodes by modifying the docker-compose.yml
+You can scale DataNodes by editing the docker-compose.yml file.
 
-Clean /output directory on HDFS before re-running WordCount
+Clean HDFS /output before rerunning the WordCount job.
 
 👩‍💻 Author
 Aparna J
@@ -136,4 +141,4 @@ Aparna J
 🎓 Project for learning Hadoop and Docker integration
 
 📜 License
-This project is licensed under the MIT License – use it, modify it, and share it.
+This project is licensed under the MIT License – feel free to use, modify, and share!
