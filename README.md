@@ -1,144 +1,239 @@
-# 🐘 Hadoop Multi-Node Cluster with Docker Compose
+# 🚀 Hadoop Multi-node in Docker
 
-Set up a fully functional **Hadoop cluster** using **Docker** and **Docker Compose** on your local machine. This setup includes:
-
-✅ 1 NameNode  
-✅ 2 DataNodes  
-✅ HDFS access and MapReduce job execution  
-✅ Web UIs for monitoring Hadoop services  
-
-🎯 **Perfect for** students, researchers, and developers learning Big Data.
-
----
-
-## 📂 Repository Structure
-
-hadoop-docker-cluster/
-│
-├── docker-compose.yml # Cluster configuration
-├── README.md # Project documentation
-
-yaml
-Copy
-Edit
-
----
-
-## 🔧 Prerequisites
-
-Ensure you have the following installed:
-
-- Docker  
-- Docker Compose  
-- Linux system (Recommended: Ubuntu 22.04+)
-
----
-
-## 🚀 Quick Start
-
-### 1️⃣ Clone the Repository
+## 🔧 Docker Group Permissions
 
 ```bash
-git clone https://github.com/your-username/hadoop-docker-cluster.git
-cd hadoop-docker-cluster
-2️⃣ Create a Custom Docker Network
-bash
-Copy
-Edit
+sudo usermod -aG docker $USER
+newgrp docker
+
+```
+
+### 🔍 Let's break it down:
+
+-   `sudo usermod -aG docker $USER`  
+    Adds your current user to the `docker` group.
+    
+-   `-aG` = append the user to the Group (`docker` group in this case).
+    
+-   `$USER` = the current logged-in username (e.g., `aparna` on your system).
+    
+
+✅ This allows your user to run Docker commands without needing `sudo`.
+
+----------
+
+## 🌐 Create a Docker Network
+
+```bash
 docker network create hadoop
-3️⃣ Launch the Cluster
-bash
-Copy
-Edit
+
+```
+
+### ✅ Why create a Docker network?
+
+When running multiple Docker containers (e.g., in a Hadoop cluster: **NameNode**, **DataNode**, **ResourceManager**, etc.), you want them to:
+
+-   Communicate by **container name** (e.g., `namenode` can ping `datanode`).
+    
+-   Stay **isolated** from other containers or networks on your machine.
+    
+-   Use **Docker's internal DNS** for easy hostname resolution.
+    
+
+----------
+
+## 🧠 Example Use Case — Hadoop Cluster Setup
+
+```bash
+# Create a shared network for Hadoop components
+docker network create hadoop
+
+# Start NameNode container on that network
+docker run -d --name namenode --network hadoop hadoop-namenode-image
+
+# Start DataNode container on the same network
+docker run -d --name datanode --network hadoop hadoop-datanode-image
+
+```
+
+✅ Now, `datanode` can connect to `namenode:8020` without needing IP addresses.
+
+----------
+
+## 🌉 Network Features Comparison
+
+Feature
+
+bridge (default)
+
+User-defined (like `hadoop`)
+
+Containers talk by name
+
+❌ No
+
+✅ Yes
+
+DNS-based service discovery
+
+❌ No
+
+✅ Yes
+
+Manual control
+
+❌ Limited
+
+✅ Full
+
+----------
+
+## 🔍 To verify your network:
+
+```bash
+docker network ls
+
+```
+
+Sample output:
+
+```
+NETWORK ID     NAME      DRIVER    SCOPE
+abcdefgh1234   hadoop    bridge    local
+
+```
+
+----------
+
+## 📁 1. Project Folder Structure
+
+```bash
+mkdir hadoop-docker-cluster
+cd hadoop-docker-cluster
+
+```
+
+----------
+
+## 🛠️ 2. `docker-compose.yml` File
+
+Create a file named `docker-compose.yml`:
+
+```yaml
+version: '3'
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    ports:
+      - "9870:9870"   # Web UI
+      - "9000:9000"   # IPC
+    environment:
+      - CLUSTER_NAME=HadoopCluster
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    networks:
+      - hadoop
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    ports:
+      - "9864:9864"   # Web UI
+    environment:
+      - CLUSTER_NAME=HadoopCluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    networks:
+      - hadoop
+    depends_on:
+      - namenode
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
+
+networks:
+  hadoop:
+    driver: bridge
+
+```
+
+----------
+
+## ▶️ 3. Start the Cluster
+
+```bash
 docker-compose up -d
-This starts:
 
-🧠 NameNode at http://localhost:9870
+```
 
-💾 DataNode 1 at http://localhost:9864
+----------
 
-💾 DataNode 2 at http://localhost:9865
+## 🌐 4. Access Hadoop Web UI
 
-To verify:
+Open your browser:
 
-bash
-Copy
-Edit
-docker ps
-🌐 Hadoop Web Interfaces
-Component	Port	URL
-NameNode	9870	http://localhost:9870
-DataNode 1	9864	http://localhost:9864
-DataNode 2	9865	http://localhost:9865
+-   **NameNode UI:** [http://localhost:9870](http://localhost:9870/)
+    
+-   **DataNode UI:** [http://localhost:9864](http://localhost:9864/)
+    
 
-🛠️ Interacting with HDFS
-Step 1: Access the NameNode Container
-bash
-Copy
-Edit
+----------
+
+## 💾 5. Interact with HDFS
+
+Enter the NameNode container:
+
+```bash
 docker exec -it namenode bash
-Step 2: Run Basic HDFS Commands
-bash
-Copy
-Edit
+
+```
+
+Run HDFS commands:
+
+```bash
 hdfs dfs -mkdir /test
 hdfs dfs -put /etc/hosts /test
 hdfs dfs -ls /test
-🧪 Run WordCount MapReduce Job
-Inside the NameNode container:
 
-bash
-Copy
-Edit
+```
+
+----------
+
+## 📊 6. Run MapReduce WordCount Job
+
+Still inside the `namenode` container:
+
+```bash
 cd $HADOOP_HOME
-
-# Prepare input
 hdfs dfs -mkdir /input
 hdfs dfs -put etc/hadoop/*.xml /input
 
-# Run job
 hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar wordcount /input /output
 
-# View output
 hdfs dfs -cat /output/part-r-00000
-🧹 Shutting Down the Cluster
-To stop the cluster:
 
-bash
-Copy
-Edit
+```
+
+----------
+
+## 🧹 7. Tear Down
+
+To stop and remove everything:
+
+```bash
 docker-compose down
-To remove volumes as well:
 
-bash
-Copy
-Edit
+```
+
+To remove volumes too:
+
+```bash
 docker-compose down -v
-🧾 Docker Network Verification
-Ensure the custom Docker network hadoop exists:
 
-bash
-Copy
-Edit
-docker network ls
-Expected output:
+```
 
-sql
-Copy
-Edit
-NETWORK ID     NAME      DRIVER    SCOPE
-abcdefgh1234   hadoop    bridge    local
-📌 Tips & Reminders
-Use docker-compose logs -f namenode to stream NameNode logs.
-
-You can scale DataNodes by editing the docker-compose.yml file.
-
-Clean HDFS /output before rerunning the WordCount job.
-
-👩‍💻 Author
-Aparna J
-🧠 Passionate about Big Data, Cloud, and AI
-🎓 Project for learning Hadoop and Docker integration
-
-📜 License
-This project is licensed under the MIT License – feel free to use, modify, and share!
+----------
